@@ -79,6 +79,8 @@ def createTextView(width=200, height=200, editable=True, wrap=True):
 		textview.set_wrap_mode(gtk.WRAP_WORD)
 
 	textview.set_editable(editable)
+	# Don't show cursor in uneditable text views.
+	textview.set_cursor_visible(editable)
 
 	return textview
 
