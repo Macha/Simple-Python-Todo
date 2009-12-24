@@ -19,6 +19,7 @@ class TodoGUI:
 		self.window.set_title("Simple Python Todo")
 	
 		send_button = gtk.Button(None, gtk.STOCK_ADD)
+		send_button.connect("clicked", self.add_item)
 
 		vbox = gtk.VBox(False, 10)
 		vbox.set_border_width(10)
@@ -26,15 +27,13 @@ class TodoGUI:
 		hbox_note_area = gtk.HBox(False, 0)
 		hbox_send_area = gtk.HBox(False, 0)
 
-
-
 		# Set up the text view for showing the notes
 		sw_display = gtk.ScrolledWindow()
 		sw_display.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
-		textview_display = createTextView(280, 200, False)
-		sw_display.add(textview_display)
-		textview_display.show()
+		self.textview_display = createTextView(280, 200, False)
+		sw_display.add(self.textview_display)
+		self.textview_display.show()
 		
 		hbox_note_area.pack_start(sw_display)
 		sw_display.show()
@@ -43,9 +42,10 @@ class TodoGUI:
 		sw_add = gtk.ScrolledWindow()
 		sw_add.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
-		textview_add = createTextView(230, 80)
-		sw_add.add(textview_add)
-		textview_add.show()
+		self.textview_add = createTextView(230, 80)
+		self.textview_add.connect("key_press_event", self.key_pressed)
+		sw_add.add(self.textview_add)
+		self.textview_add.show()
 		
 		hbox_send_area.pack_start(sw_add)
 		sw_add.show()
@@ -75,6 +75,24 @@ class TodoGUI:
 		gtk.main_quit()
 		return False
 
+	def key_pressed(self, widget, event, Data=None):
+		"""
+		Checks if enter was pressed, and if so, adds a new item
+		"""
+		if event.keyval == gtk.gdk.keyval_from_name('Return') or \
+		event.keyval == gtk.gdk.keyval_from_name('KP_Enter'):
+			self.add_item()
+			return True		
+	
+	def add_item(self, widget=None, Data=None):
+		"""
+		Adds an item to the todo list.
+		"""
+		note = getAllTextViewText(self.textview_add) + "\n"
+		self.textview_add.get_buffer().set_text("")
+		displaybuffer = self.textview_display.get_buffer()
+		displaybuffer.insert(displaybuffer.get_end_iter(), note)
+
 def createTextView(width=200, height=200, editable=True, wrap=True):
 	"""
 	Creates a text view with certain settings.
@@ -98,6 +116,6 @@ def getAllTextViewText(textview):
 	textbuffer = textview.get_buffer()
 	startiter, enditer = textbuffer.get_bounds()
 	text = startiter.get_slice(enditer)
-
+	return text
 
 TodoGUI().main()
