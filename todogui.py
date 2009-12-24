@@ -73,8 +73,11 @@ class TodoGUI:
 
 def createTextView(width=200, height=200, editable=True, wrap=True):
 	textview = gtk.TextView()
-	textview.set_size_request(width, height)	
-	textview.set_wrap_mode(wrap)
+	textview.set_size_request(width, height)
+
+	if wrap is True:
+		textview.set_wrap_mode(gtk.WRAP_WORD)
+
 	textview.set_editable(editable)
 
 	return textview
