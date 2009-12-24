@@ -14,7 +14,9 @@ class TodoGUI:
 	def __init__(self):
 		"""
 		Creates the GUI display.
-		"""
+		"""		
+		self.todolist = TodoList(json_folder + "todo.json")
+
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.window.set_title("Simple Python Todo")
 	
@@ -33,6 +35,8 @@ class TodoGUI:
 		
 		self.textview_display = createTextView(280, 200, False)
 		sw_display.add(self.textview_display)
+		self.textview_display.get_buffer().set_text(self.todolist.idLessString())
+		
 		self.textview_display.show()
 		
 		hbox_note_area.pack_start(sw_display)
@@ -72,6 +76,7 @@ class TodoGUI:
 		gtk.main()
 
 	def delete_event(self, widget, event, Data=None):
+		self.todolist.save()
 		gtk.main_quit()
 		return False
 
@@ -89,6 +94,7 @@ class TodoGUI:
 		Adds an item to the todo list.
 		"""
 		note = getAllTextViewText(self.textview_add) + "\n"
+		self.todolist.add(note)
 		self.textview_add.get_buffer().set_text("")
 		displaybuffer = self.textview_display.get_buffer()
 		displaybuffer.insert(displaybuffer.get_end_iter(), note)

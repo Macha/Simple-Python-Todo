@@ -33,6 +33,16 @@ class TodoList:
 		string = string[:-1] # Cut out final newline
 		return string
 			
+	def idLessString(self):
+		"""
+		Returns a string of this list without the id numbers.
+		"""
+		string = ""
+		for item in self.list:
+			string = string + str(item['text']) + "\n"
+		string = string[:-1] # Cut out final newline
+		return string
+
 	def __len__(self):
 		return len(self.list)
 
