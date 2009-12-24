@@ -12,6 +12,9 @@ json_folder = os.path.expanduser("~") + "/.todopy/"
 
 class TodoGUI:
 	def __init__(self):
+		"""
+		Creates the GUI display.
+		"""
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.window.set_title("Simple Python Todo")
 	
@@ -30,7 +33,6 @@ class TodoGUI:
 		sw_display.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
 		textview_display = createTextView(280, 200, False)
-		textbuffer_display = textview_display.get_buffer()
 		sw_display.add(textview_display)
 		textview_display.show()
 		
@@ -42,7 +44,6 @@ class TodoGUI:
 		sw_add.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
 		textview_add = createTextView(230, 80)
-		textbuffer_add = textview_add.get_buffer()
 		sw_add.add(textview_add)
 		textview_add.show()
 		
@@ -65,6 +66,9 @@ class TodoGUI:
 		self.window.show()
 
 	def main(self):
+		"""
+		Starts the Todo GUI
+		"""
 		gtk.main()
 
 	def delete_event(self, widget, event, Data=None):
@@ -72,6 +76,9 @@ class TodoGUI:
 		return False
 
 def createTextView(width=200, height=200, editable=True, wrap=True):
+	"""
+	Creates a text view with certain settings.
+	"""
 	textview = gtk.TextView()
 	textview.set_size_request(width, height)
 
@@ -83,5 +90,14 @@ def createTextView(width=200, height=200, editable=True, wrap=True):
 	textview.set_cursor_visible(editable)
 
 	return textview
+
+def getAllTextViewText(textview):
+	"""
+	Gets all the text from a text view.
+	"""
+	textbuffer = textview.get_buffer()
+	startiter, enditer = textbuffer.get_bounds()
+	text = startiter.get_slice(enditer)
+
 
 TodoGUI().main()
