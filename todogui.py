@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from todolist import *
+import glob
 import os
 import sys
 
@@ -11,11 +12,27 @@ import gtk
 json_folder = os.path.expanduser("~") + "/.todopy/"
 
 class TodoGUI:
+
+	lists = {}
+
 	def __init__(self):
 		"""
 		Creates the GUI display.
-		"""		
+		"""
 		self.todolist = TodoList(json_folder + "todo.json")
+
+		for infile in glob.glob( os.path.join(json_folder, '*.json') ):
+			listname = infile.replace(json_folder, "").replace(".json", "")
+			self.lists[listname] = TodoList(infile)
+			print "Found:", infile.replace(json_folder, "").replace(".json", "")
+
+		for k, v in self.lists.iteritems():
+			print 
+			print k
+			print "------------"
+			print v
+			print
+
 
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.window.set_title("Simple Python Todo")

@@ -129,7 +129,9 @@ class Todo:
 		if len(sys.argv) > 2:
 			list_name = sys.argv[2]
 
+		print
 		print TodoList(self.getListFilename(list_name))
+		print
 
 	def getListFilename(self, list_name):
 		"""

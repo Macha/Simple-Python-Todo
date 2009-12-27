@@ -27,10 +27,12 @@ class TodoList:
 		self.list.append(new_item)
 
 	def __str__(self):
-		string = ""
+		stringlist = []
+
 		for item in self.list:
-			string = string + str(item['id']) + "\t" + str(item['text']) + "\n"
-		string = string[:-1] # Cut out final newline
+			stringlist.append(str(item['id']) + "\t" + str(item['text']))
+
+		string = '\n'.join(stringlist)
 		return string
 			
 	def idLessString(self):
@@ -45,6 +47,11 @@ class TodoList:
 
 	def __len__(self):
 		return len(self.list)
+
+	def __contains__(self, item):
+		if item in self.list:
+			return True
+		return False
 
 	def remove(self, item_id):
 		"""
@@ -76,5 +83,12 @@ class TodoList:
 		Writes the list data to file.
 		"""
 		json_file = open(self.json_location, "w")
+		
+		# Re-order indices
+		id = 1
+		for item in self.list:
+			item['id'] = id
+			id += 1
+
 		json_file.write(json.dumps(self.list))
 		json_file.close()
