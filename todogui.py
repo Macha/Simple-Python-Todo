@@ -19,6 +19,9 @@ class TodoGUI:
 		"""
 		Creates the GUI display.
 		"""
+		
+		# Initialise default list.
+		# TODO: Support multiple lists
 		self.todolist = TodoList(json_folder + "todo.json")
 
 		for infile in glob.glob( os.path.join(json_folder, '*.json') ):
@@ -50,14 +53,14 @@ class TodoGUI:
 		sw_display = gtk.ScrolledWindow()
 		sw_display.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
-		self.textview_display = createTextView(280, 200, False)
-		sw_display.add(self.textview_display)
-		self.textview_display.get_buffer().set_text(self.todolist.idLessString())
-		
-		self.textview_display.show()
+		self.store = self.create_model()
+		self.display_view = gtk.TreeView(self.store)
+		self.display_view.set_size_request(280, 200)
+		self.display_view.set_rules_hint(True)	
+		self.create_columns(self.display_view)
+		sw_display.add(self.display_view)
 		
 		hbox_note_area.pack_start(sw_display)
-		sw_display.show()
 
 		# Set up the text view for adding new notes
 		sw_add = gtk.ScrolledWindow()
@@ -66,13 +69,9 @@ class TodoGUI:
 		self.textview_add = createTextView(230, 80)
 		self.textview_add.connect("key_press_event", self.key_pressed)
 		sw_add.add(self.textview_add)
-		self.textview_add.show()
 		
 		hbox_send_area.pack_start(sw_add)
-		sw_add.show()
-
 		hbox_send_area.pack_start(send_button)
-		send_button.show()
 
 
 		# Organise the boxes
@@ -81,10 +80,9 @@ class TodoGUI:
 		vbox.pack_start(hbox_send_area)
 		hbox_send_area.show()
 		self.window.add(vbox)
-		vbox.show()
 
 		self.window.connect("delete_event", self.delete_event)
-		self.window.show()
+		self.window.show_all()
 
 	def main(self):
 		"""
@@ -92,7 +90,31 @@ class TodoGUI:
 		"""
 		gtk.main()
 
+	def create_model(self):
+		"""
+		Sets up the store for the TreeView
+		"""
+		store = gtk.ListStore(int, str)
+
+		for todo in self.todolist:
+			store.append([todo['id'], todo['text']])
+
+		return store
+
+	def create_columns(self, tree_view):
+		"""
+		Sets up the columns for the TreeView
+		"""
+		
+		renderer_text = gtk.CellRendererText()
+		column = gtk.TreeViewColumn("Text", renderer_text, text=1)
+		column.set_sort_column_id(1)
+		tree_view.append_column(column)
+
 	def delete_event(self, widget, event, Data=None):
+		"""
+		Saves the list and closes the app.
+		"""
 		self.todolist.save()
 		gtk.main_quit()
 		return False
@@ -111,10 +133,9 @@ class TodoGUI:
 		Adds an item to the todo list.
 		"""
 		note = getAllTextViewText(self.textview_add) + "\n"
-		self.todolist.add(note)
+		newid = self.todolist.add(note)
 		self.textview_add.get_buffer().set_text("")
-		displaybuffer = self.textview_display.get_buffer()
-		displaybuffer.insert(displaybuffer.get_end_iter(), note)
+		self.store.append([newid, note])
 
 def createTextView(width=200, height=200, editable=True, wrap=True):
 	"""

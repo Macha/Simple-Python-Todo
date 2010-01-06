@@ -25,6 +25,7 @@ class TodoList:
 
 		new_item = {'id': last_id + 1, 'text': text}
 		self.list.append(new_item)
+		return last_id + 1
 
 	def __str__(self):
 		stringlist = []
@@ -47,6 +48,16 @@ class TodoList:
 
 	def __len__(self):
 		return len(self.list)
+
+	def __iter__(self):
+		return self.forward()
+
+	def forward(self):
+		current_item = 0
+		while (current_item < len(self)):
+			item = self.list[current_item]
+			current_item += 1
+			yield item
 
 	def __contains__(self, item):
 		if item in self.list:
