@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from todolist import *
+import todocell
 import glob
 import os
 import sys
@@ -107,7 +108,11 @@ class TodoGUI:
 		"""
 		
 		renderer_text = gtk.CellRendererText()
+		renderer_text.props.wrap_width = 280
+		renderer_text.props.wrap_mode = gtk.WRAP_WORD
 		column = gtk.TreeViewColumn("Text", renderer_text, text=1)
+		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+		column.set_max_width(200)
 		column.set_sort_column_id(1)
 		tree_view.append_column(column)
 
@@ -136,6 +141,12 @@ class TodoGUI:
 		newid = self.todolist.add(note)
 		self.textview_add.get_buffer().set_text("")
 		self.store.append([newid, note])
+
+	def on_activated(self, widget, row, col):
+		"""
+		Sets the currently selected items ID
+		"""
+		pass
 
 def createTextView(width=200, height=200, editable=True, wrap=True):
 	"""
