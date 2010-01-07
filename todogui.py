@@ -67,7 +67,7 @@ class TodoGUI:
 		sw_add = gtk.ScrolledWindow()
 		sw_add.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
-		self.textview_add = createTextView(230, 80)
+		self.textview_add = self.createTextView(230, 80)
 		self.textview_add.connect("key_press_event", self.key_pressed)
 		sw_add.add(self.textview_add)
 		
@@ -137,7 +137,7 @@ class TodoGUI:
 		"""
 		Adds an item to the todo list.
 		"""
-		note = getAllTextViewText(self.textview_add) + "\n"
+		note = self.getAllTextViewText(self.textview_add)
 		newid = self.todolist.add(note)
 		self.textview_add.get_buffer().set_text("")
 		self.store.append([newid, note])
@@ -148,29 +148,29 @@ class TodoGUI:
 		"""
 		pass
 
-def createTextView(width=200, height=200, editable=True, wrap=True):
-	"""
-	Creates a text view with certain settings.
-	"""
-	textview = gtk.TextView()
-	textview.set_size_request(width, height)
+	def createTextView(self, width=200, height=200, editable=True, wrap=True):
+		"""
+		Creates a text view with certain settings.
+		"""
+		textview = gtk.TextView()
+		textview.set_size_request(width, height)
 
-	if wrap is True:
-		textview.set_wrap_mode(gtk.WRAP_WORD)
+		if wrap is True:
+			textview.set_wrap_mode(gtk.WRAP_WORD)
 
-	textview.set_editable(editable)
-	# Don't show cursor in uneditable text views.
-	textview.set_cursor_visible(editable)
+		textview.set_editable(editable)
+		# Don't show cursor in uneditable text views.
+		textview.set_cursor_visible(editable)
 
-	return textview
+		return textview
 
-def getAllTextViewText(textview):
-	"""
-	Gets all the text from a text view.
-	"""
-	textbuffer = textview.get_buffer()
-	startiter, enditer = textbuffer.get_bounds()
-	text = startiter.get_slice(enditer)
-	return text
+	def getAllTextViewText(self, textview):
+		"""
+		Gets all the text from a text view.
+		"""
+		textbuffer = textview.get_buffer()
+		startiter, enditer = textbuffer.get_bounds()
+		text = startiter.get_slice(enditer)
+		return text
 
 TodoGUI().main()
