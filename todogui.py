@@ -141,7 +141,7 @@ class TodoGUI:
 		"""
 		Deletes the item from the list if the delete key is pressed.
 		""" 
-		if event_keyval == gtk.gdk.keyval_from_name("Delete") and self.selected_id != -1:
+		if event.keyval == gtk.gdk.keyval_from_name("Delete") and self.selected_id != -1:
 			self.remove_item(self.selected_id)
 			self.selected_id = -1;
 			return True
