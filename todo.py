@@ -158,6 +158,5 @@ class Todo:
 		print "\t create <list> \t\t\t - Creates a list with the name <list>"
 		print "\t delete <list> \t\t\t - Deletes the list with the name <list>"
 		print
-		print
 
 Todo().run()
