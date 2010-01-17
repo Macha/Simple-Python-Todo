@@ -65,7 +65,7 @@ Listing Items from a Certain List
 ----------------------------------
 Use `todo.py list <listname>`
 
-Removing Certain Items from a Certain List
+Removing Finished Items from a Certain List
 -----------------------------------
 Use `todo.py donein <listname> <id>`
 To get the ID, use `todo.py list <listname>`
