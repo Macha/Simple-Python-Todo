@@ -60,7 +60,7 @@ class Todo:
 			print "Created:", list_name
 			print
 
-	def delete_list(self):
+	def delete(self):
 		"""
 		Deletes a list.
 		"""
@@ -156,6 +156,7 @@ class Todo:
 		print "\t list <list> \t\t\t - Prints out a certain list."
 		print "\t removefrom <list> <ID> \t - Removes a message from a certain list"
 		print "\t create <list> \t\t\t - Creates a list with the name <list>"
+		print "\t delete <list> \t\t\t - Deletes the list with the name <list>"
 		print
 		print
 
