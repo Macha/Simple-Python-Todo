@@ -1,3 +1,35 @@
+.oOOOo.                     o             
+o     o  o                 O              
+O.                         o              
+ `OOoo.                    O              
+      `O O  `oOOoOO. .oOo. o  .oOo.       
+       o o   O  o  o O   o O  OooO'       
+O.    .O O   o  O  O o   O o  O           
+ `oooO'  o'  O  o  o oOoO' Oo `OoO'       
+                     O                    
+                     o'                   
+
+OooOOo.               o                 
+O     `O             O                  
+o      O         O   o                  
+O     .o        oOo  O                  
+oOooOO'  O   o   o   OoOo. .oOo. 'OoOo. 
+o        o   O   O   o   o O   o  o   O 
+O        O   o   o   o   O o   O  O   o 
+o'       `OoOO   `oO O   o `OoO'  o   O 
+             o                          
+          OoO'                          
+
+oOoOOoOOo  .oOOOo.  o.OOOo.    .oOOOo.  
+    o     .O     o.  O    `o  .O     o. 
+    o     O       o  o      O O       o 
+    O     o       O  O      o o       O 
+    o     O       o  o      O O       o 
+    O     o       O  O      o o       O 
+    O     `o     O'  o    .O' `o     O' 
+    o'     `OoooO'   OooOO'    `OoooO'  
+                                       
+
 This is a simple todo manager written in Python. At the moment it is command 
 line only, but a GUI version is being created.
 

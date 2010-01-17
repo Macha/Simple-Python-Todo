@@ -24,7 +24,10 @@ class TodoGUI:
 		# Initialise default list.
 		# TODO: Support multiple lists
 		self.todolist = TodoList(json_folder + "todo.json")
+	
+		self.selected_id = -1;
 
+		# Start of multiple lists support. Currently unused
 		for infile in glob.glob( os.path.join(json_folder, '*.json') ):
 			listname = infile.replace(json_folder, "").replace(".json", "")
 			self.lists[listname] = TodoList(infile)
@@ -57,6 +60,8 @@ class TodoGUI:
 		self.store = self.create_model()
 		self.display_view = gtk.TreeView(self.store)
 		self.display_view.set_size_request(280, 200)
+		self.display_view.connect("row-activated", self.on_activated)
+		self.display_view.connect("key_press_event", self.display_key_pressed)
 		self.display_view.set_rules_hint(True)	
 		self.create_columns(self.display_view)
 		sw_display.add(self.display_view)
@@ -132,6 +137,15 @@ class TodoGUI:
 		event.keyval == gtk.gdk.keyval_from_name('KP_Enter'):
 			self.add_item()
 			return True		
+
+	def display_key_pressed(self, widget, event, Data=None):
+		"""
+		Deletes the item from the list if the delete key is pressed.
+		""" 
+		if event_keyval == gtk.gdk.keyval_from_name("Delete") and self.selected_id != -1:
+			self.remove_item(self.selected_id)
+			self.selected_id = -1;
+			return True
 	
 	def add_item(self, widget=None, Data=None):
 		"""
@@ -142,11 +156,24 @@ class TodoGUI:
 		self.textview_add.get_buffer().set_text("")
 		self.store.append([newid, note])
 
+	def remove_item(self, item_id):
+		self.todolist.remove(item_id)
+		model = self.store.get_model()
+		model.foreach(get_iter_to_item, item_id)
+		pass
+
+	def remove_item_by_iter(iter_):
+		pass
+
+	def get_iter_to_item(self, path, iter_, target):
+		pass 
+
 	def on_activated(self, widget, row, col):
 		"""
 		Sets the currently selected items ID
 		"""
-		pass
+		model = widget.get_model()
+		self.selected_id = model[row][0]
 
 	def createTextView(self, width=200, height=200, editable=True, wrap=True):
 		"""
