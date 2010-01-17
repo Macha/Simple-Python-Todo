@@ -1,4 +1,4 @@
-.oOOOo.                     o             
+<pre>.oOOOo.                     o             
 o     o  o                 O              
 O.                         o              
  `OOoo.                    O              
@@ -28,7 +28,7 @@ oOoOOoOOo  .oOOOo.  o.OOOo.    .oOOOo.
     O     o       O  O      o o       O 
     O     `o     O'  o    .O' `o     O' 
     o'     `OoooO'   OooOO'    `OoooO'  
-                                       
+                                       </pre>
 
 This is a simple todo manager written in Python. At the moment it is command 
 line only, but a GUI version is being created.
