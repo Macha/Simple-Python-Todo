@@ -96,14 +96,14 @@ class Todo:
 		print "Added:", text
 		print
 
-	def remove(self):
+	def done(self):
 		"""
 		Removes an item from the todo list by ID
 		"""
 		item_id = int(sys.argv[2])
-		self.removefrom("todo", item_id)
+		self.donein("todo", item_id)
 
-	def removefrom(self, list_name="todo", item_id=-1):
+	def donein(self, list_name="todo", item_id=-1):
 		"""
 		Removes an item from a certain list.
 		"""
@@ -148,13 +148,13 @@ class Todo:
 		print "Usage (simple):"
 		print "\t add <message> \t- Adds a message to the todo list"
 		print "\t list \t\t- Lists all current todo items"
-		print "\t remove <ID> \t- Removes the todo item with the specified ID"
+		print "\t done <ID> \t- Removes a finished todo item with the specified ID"
 		print "\t install \t- Sets up the data files needed to run the script"
 		print
 		print "Usage (multiple lists):"
 		print "\t addto <list> <message> \t - Adds a message to a certain list"
 		print "\t list <list> \t\t\t - Prints out a certain list."
-		print "\t removefrom <list> <ID> \t - Removes a message from a certain list"
+		print "\t donein <list> <ID> \t - Marks a message done in a certain list"
 		print "\t create <list> \t\t\t - Creates a list with the name <list>"
 		print "\t delete <list> \t\t\t - Deletes the list with the name <list>"
 		print

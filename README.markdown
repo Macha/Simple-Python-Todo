@@ -48,9 +48,9 @@ Listing Items
 -------------
 Use `todo.py list`
 
-Removing Items
+Removing Finished Items
 --------------
-Use `todo.py remove <id>`
+Use `todo.py done <id>`
 To get the ID, use `todo.py list`
 
 Usage with multiple lists
@@ -65,9 +65,9 @@ Listing Items from a Certain List
 ----------------------------------
 Use `todo.py list <listname>`
 
-Removing Items from a Certain List
+Removing Certain Items from a Certain List
 -----------------------------------
-Use `todo.py removefrom <listname> <id>`
+Use `todo.py donein <listname> <id>`
 To get the ID, use `todo.py list <listname>`
 
 Creating a New List
