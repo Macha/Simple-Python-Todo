@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from todolist import *
-import todocell
 import glob
 import os
 import sys
