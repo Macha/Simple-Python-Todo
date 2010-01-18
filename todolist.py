@@ -52,6 +52,10 @@ class TodoList:
 	def __iter__(self):
 		return self.forward()
 
+	def __getitem__(self, item):
+		item -= 1 # Correct index errors (lists are 0-based, TodoLists are 1-based)
+		return self.list[item]
+
 	def forward(self):
 		current_item = 0
 		while (current_item < len(self)):
