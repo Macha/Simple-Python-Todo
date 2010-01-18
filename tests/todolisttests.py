@@ -86,6 +86,10 @@ class TodoListTests(unittest.TestCase):
 		self.create_todolist_and_safe_list()
 		self.assertEquals({"text": "Sometext", "id": 2}, self.todolist[2])
 
+	def test_get_by_id_out_of_bounds(self):
+		self.create_todolist_and_safe_list()
+		self.assertRaises(IndexError, self.todolist.__getitem__, 27)
+
 	def test_list_does_not_exist(self):
 		self.assertRaises(todolist.NoSuchListError, todolist.TodoList, "fakey")
 
