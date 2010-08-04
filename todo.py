@@ -39,26 +39,36 @@ class Todo:
 		"""
 		Sets up the data files for storing the todo list.
 		"""
-		os.mkdir(json_folder)
-		create("todo", False)
+		try:
+			os.mkdir(json_folder)
+		except OSError as e:
 
-		print
+			if e.errno == 17:
+				# Folder exists, do nothing
+				pass
+			else:
+				# Something has gone seriously wrong - rethrow the exception
+				raise e
+			
+		self.create("todo", False)
+
 		print "Simple Python Todo Installed"
-		print
 
-	def create(self, print_output=True):
+	def create(self, name=None, print_output=True):
 		"""
 		Creates a new list.
 		"""
-		list_name = sys.argv[2]
-		json_file = open(self.getListFilename(list_name), "w")
+		if name is None:
+			list_name = sys.argv[2]
+		else:
+			list_name = name
+		
+		json_file = open(self.getListFilename(list_name), "a")
 		json_file.write("[]")
 		json_file.close()
 
 		if print_output:
-			print
 			print "Created:", list_name
-			print
 
 	def delete(self):
 		"""
@@ -68,9 +78,7 @@ class Todo:
 		list_name = sys.argv[2]
 		os.remove(self.getListFilename(list_name))
 
-		print
 		print list_name, "removed"
-		print
 
 	def add(self):
 		"""
@@ -91,10 +99,8 @@ class Todo:
 		todo_list.add(text)
 		todo_list.save()	
 
-		print
 		print "Added to:", list_name
 		print "Added:", text
-		print
 
 	def done(self):
 		"""
@@ -116,10 +122,8 @@ class Todo:
 		removed_text = todo_list.remove(item_id)
 		todo_list.save()
 
-		print
 		print "Removed from:", list_name
 		print "Removed:", removed_text
-		print
 		
 	def list(self, list_name="todo"):
 		"""
@@ -129,9 +133,7 @@ class Todo:
 		if len(sys.argv) > 2:
 			list_name = sys.argv[2]
 
-		print
 		print TodoList(self.getListFilename(list_name))
-		print
 
 	def getListFilename(self, list_name):
 		"""
