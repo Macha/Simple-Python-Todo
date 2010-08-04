@@ -63,12 +63,18 @@ class Todo:
 		else:
 			list_name = name
 		
-		json_file = open(self.getListFilename(list_name), "a")
-		json_file.write("[]")
-		json_file.close()
+		try:
+			json_file = open(self.getListFilename(list_name), "r")
+			json.loads(json_file.read())
+			if print_output:
+				print list_name, "already exists."
+		except IOError as e:
+			if e.errno == 2: # No file, create file.
+				json_file = open(self.getListFilename(list_name), "w")
+				json_file.write("[]")
+				if print_output:
+					print "Created:", list_name
 
-		if print_output:
-			print "Created:", list_name
 
 	def delete(self):
 		"""
