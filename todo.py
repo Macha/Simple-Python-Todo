@@ -115,11 +115,11 @@ class Todo:
 		item_id = int(sys.argv[2])
 		self.donein("todo", item_id)
 
-	def donein(self, list_name="todo", item_id=-1):
+	def donein(self, list_name="todo", item_id=None):
 		"""
 		Removes an item from a certain list.
 		"""
-		if item_id < 0:
+		if item_id is None:
 			list_name = sys.argv[2]
 			item_id = int(sys.argv[3])
 
