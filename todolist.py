@@ -18,20 +18,20 @@ class TodoList:
 		Adds an item to the list
 		"""
 		try:
-			last_id = self.list[-1]['id']
+			last_id = self.list[-1].id
 		except IndexError:
 			# No items in list
-			last_id = 0
+			last_id = - 1 
 
-		new_item = {'id': last_id + 1, 'text': text}
+		new_item = TodoItem(last_id + 1, text)
 		self.list.append(new_item)
-		return last_id + 1
+		return new_item
 
 	def __str__(self):
 		stringlist = []
 
 		for item in self.list:
-			stringlist.append(str(item['id']) + "\t" + str(item['text']))
+			stringlist.append(str(item.id) + '\t' + str(item.text))
 
 		string = '\n'.join(stringlist)
 		return string
@@ -40,9 +40,9 @@ class TodoList:
 		"""
 		Returns a string of this list without the id numbers.
 		"""
-		string = ""
+		string = ''
 		for item in self.list:
-			string = string + str(item['text']) + "\n"
+			string = string + str(item.text) + '\n'
 		string = string[:-1] # Cut out final newline
 		return string
 
@@ -52,9 +52,14 @@ class TodoList:
 	def __iter__(self):
 		return self.forward()
 
-	def __getitem__(self, item):
-		item -= 1 # Correct index errors (lists are 0-based, TodoLists are 1-based)
-		return self.list[item]
+	def __getitem__(self, item_id):
+		print item_id
+		for todo in self.list:
+			if todo.id == item_id:
+				return todo
+			else:
+				print item_id, 'not matched for', todo.id, todo
+		raise IndexError('No such item')
 
 	def forward(self):
 		current_item = 0
@@ -72,24 +77,27 @@ class TodoList:
 		"""
 		Removes an item from the list.
 		"""
-		for todo in self.list[:]:
-			if todo['id'] == item_id:
-				removed_text = todo['id']
-				self.list.remove(todo)
-				return removed_text
-
-		return "Nothing"
+		todo = self[item_id]
+		removed_text = todo.text
+		self.list.remove(todo)
+		return removed_text
 
 	def load(self):
 		"""
 		Loads the list data from file.
 		"""
 		try:
-			json_file = open(self.json_location, "r")
+			json_file = open(self.json_location, 'r')
 			json_text = json_file.read()
 			json_file.close()
 
-			self.list = json.loads(json_text)
+			json_list = json.loads(json_text)
+			
+			self.list = []
+			for item in json_list:
+				self.list.append(TodoItem(item['id'], item['text']))
+				print item
+
 		except IOError:
 			raise NoSuchListError
 
@@ -97,13 +105,26 @@ class TodoList:
 		"""
 		Writes the list data to file.
 		"""
-		json_file = open(self.json_location, "w")
+		json_file = open(self.json_location, 'w')
 		
+		json_list = []
 		# Re-order indices
-		id = 1
+		id = 0 
 		for item in self.list:
-			item['id'] = id
+			item.id = id
+			json_list.append(item.asdict())
 			id += 1
 
-		json_file.write(json.dumps(self.list))
+		json_file.write(json.dumps(json_list))
 		json_file.close()
+
+class TodoItem:
+	def __init__(self, id, text):
+		self.id = id
+		self.text = text
+
+	def __str__(self):
+		return self.text
+
+	def asdict(self):
+		return {'id': self.id, 'text': self.text }

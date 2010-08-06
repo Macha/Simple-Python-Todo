@@ -169,7 +169,9 @@ class ListPanel:
 		store = gtk.ListStore(int, str)
 
 		for todo in todolist:
-			store.append([todo['id'], todo['text']])
+			new_row = (todo.id, todo.text)
+			print new_row
+			store.append(new_row)
 
 		return store
 	
@@ -183,32 +185,40 @@ class ListPanel:
 		renderer_text.props.wrap_mode = pango.WRAP_WORD
 		column = gtk.TreeViewColumn('Text', renderer_text, text=1)
 		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
-		#column.set_max_width(200)
-		column.set_sort_column_id(1)
+		column.set_sort_column_id(0)
 		tree_view.append_column(column)
 	
 	def add_item(self, text):
 		"""
 		Adds an item to the todo list.
 		"""
-		newid = self.todolist.add(text)
-		self.store.append([newid, text])
+		new_todo = self.todolist.add(text)
+		self.store.append((new_todo.id, text))
 
 	def remove_item(self, item_id):
 		"""
 		Remove an item from the list, and the display.
 		"""
-		self.todolist.remove(item_id + 1) # List's are 1-indexed, everything else is 0-indexed
-		model = self.store
-		titer = model.get_iter_root()
-		while True:
-			if model.get_path(titer)[0] == item_id:
-				model.remove(titer)
-				break
-			else:
-				titer = model.iter_next(titer)
-				if titer is None:
-					break
+		self.todolist.remove(item_id) 
+		store = self.store
+		store.foreach(self.find_item_to_remove, item_id)
+		#titer = store.get_iter_root()
+		#while True:
+		#	if store.get_path(titer)[0] == item_id:
+		#		store.remove(titer)
+		#		break
+		#	else:
+		#		titer = store.iter_next(titer)
+		#		if titer is None:
+		#			break
+
+	def find_item_to_remove(self, model, path, iter, user_data):
+		"""
+		Finds and removes the correct item from the ListStore.
+		"""
+		if path[0] == user_data:
+			model.remove(iter)
+			return True
 
 	def key_pressed(self, widget, event, Data=None):
 		"""
@@ -223,9 +233,11 @@ class ListPanel:
 		"""
 		Sets the currently selected items ID
 		"""
-		model, titer = selection.get_selected()
+		store, titer = selection.get_selected()
 		if titer is not None:
-			self.selection_id = model.get_path(titer)[0] 
-			print self.selection_id
+			print store.get_path(titer)
+			for item in store:
+				print item[0], item[1]
+			self.selection_id = store.get_value(titer, 0)
 
 TodoGUI().main()
