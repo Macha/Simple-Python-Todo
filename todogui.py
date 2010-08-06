@@ -9,7 +9,7 @@ pygtk.require('2.0')
 import gtk
 
 
-json_folder = os.path.expanduser("~") + "/.todopy/"
+json_folder = os.path.expanduser('~') + '/.todopy/'
 
 class TodoGUI:
 
@@ -22,29 +22,29 @@ class TodoGUI:
 		
 		# Initialise default list.
 		# TODO: Support multiple lists
-		self.todolist = TodoList(json_folder + "todo.json")
+		self.todolist = TodoList(json_folder + 'todo.json')
 	
-		self.selected_id = -1;
+		self.selection_id = None;
 
 		# Start of multiple lists support. Currently unused
 		for infile in glob.glob( os.path.join(json_folder, '*.json') ):
-			listname = infile.replace(json_folder, "").replace(".json", "")
+			listname = infile.replace(json_folder, '').replace('.json', '')
 			self.lists[listname] = TodoList(infile)
-			print "Found:", infile.replace(json_folder, "").replace(".json", "")
+			print 'Found:', infile.replace(json_folder, '').replace('.json', '')
 
 		for k, v in self.lists.iteritems():
 			print 
 			print k
-			print "------------"
+			print '------------'
 			print v
 			print
 
 
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-		self.window.set_title("Simple Python Todo")
+		self.window.set_title('Simple Python Todo')
 	
 		send_button = gtk.Button(None, gtk.STOCK_ADD)
-		send_button.connect("clicked", self.add_item)
+		send_button.connect('clicked', self.add_item)
 
 		vbox = gtk.VBox(False, 10)
 		vbox.set_border_width(10)
@@ -59,9 +59,13 @@ class TodoGUI:
 		self.store = self.create_model()
 		self.display_view = gtk.TreeView(self.store)
 		self.display_view.set_size_request(280, 200)
-		self.display_view.connect("row-activated", self.on_activated)
-		self.display_view.connect("key_press_event", self.display_key_pressed)
-		self.display_view.set_rules_hint(True)	
+		self.display_view.connect('key_press_event', self.display_key_pressed)
+
+		selection = self.display_view.get_selection()
+		selection.connect("changed", self.selection_changed)
+		selection.set_mode(gtk.SELECTION_SINGLE)
+
+		self.display_view.set_rules_hint(True)
 		self.create_columns(self.display_view)
 		sw_display.add(self.display_view)
 		
@@ -71,8 +75,8 @@ class TodoGUI:
 		sw_add = gtk.ScrolledWindow()
 		sw_add.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		
-		self.textview_add = self.createTextView(230, 80)
-		self.textview_add.connect("key_press_event", self.key_pressed)
+		self.textview_add = self.create_text_view(230, 80)
+		self.textview_add.connect('key_press_event', self.textbox_key_pressed)
 		sw_add.add(self.textview_add)
 		
 		hbox_send_area.pack_start(sw_add)
@@ -86,7 +90,7 @@ class TodoGUI:
 		hbox_send_area.show()
 		self.window.add(vbox)
 
-		self.window.connect("delete_event", self.delete_event)
+		self.window.connect('delete_event', self.delete_event)
 		self.window.show_all()
 
 	def main(self):
@@ -114,7 +118,7 @@ class TodoGUI:
 		renderer_text = gtk.CellRendererText()
 		renderer_text.props.wrap_width = 280
 		renderer_text.props.wrap_mode = gtk.WRAP_WORD
-		column = gtk.TreeViewColumn("Text", renderer_text, text=1)
+		column = gtk.TreeViewColumn('Text', renderer_text, text=1)
 		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
 		column.set_max_width(200)
 		column.set_sort_column_id(1)
@@ -128,7 +132,7 @@ class TodoGUI:
 		gtk.main_quit()
 		return False
 
-	def key_pressed(self, widget, event, Data=None):
+	def textbox_key_pressed(self, widget, event, Data=None):
 		"""
 		Checks if enter was pressed, and if so, adds a new item
 		"""
@@ -141,40 +145,44 @@ class TodoGUI:
 		"""
 		Deletes the item from the list if the delete key is pressed.
 		""" 
-		if event.keyval == gtk.gdk.keyval_from_name("Delete") and self.selected_id != -1:
-			self.remove_item(self.selected_id)
-			self.selected_id = -1;
+		print 'display_key_pressed', self.selection_id
+		if event.keyval == gtk.gdk.keyval_from_name('Delete') and self.selection_id is not None:
+			print 'DELETE'
+			self.remove_item(self.selection_id)
+			self.selection_id = None;
 			return True
 	
 	def add_item(self, widget=None, Data=None):
 		"""
 		Adds an item to the todo list.
 		"""
-		note = self.getAllTextViewText(self.textview_add)
+		note = self.get_all_text_view_text(self.textview_add)
 		newid = self.todolist.add(note)
-		self.textview_add.get_buffer().set_text("")
+		self.textview_add.get_buffer().set_text('')
 		self.store.append([newid, note])
 
 	def remove_item(self, item_id):
-		self.todolist.remove(item_id)
-		model = self.store.get_model()
-		model.foreach(get_iter_to_item, item_id)
-		pass
+		self.todolist.remove(item_id + 1)
+		model = self.store
+		titer = model.get_iter_root()
+		while True:
+			if model.get_path(titer)[0] == item_id:
+				model.remove(titer)
+				break
+			else:
+				titer = model.iter_next(titer)
+				if titer is None:
+					break
 
-	def remove_item_by_iter(iter_):
-		pass
-
-	def get_iter_to_item(self, path, iter_, target):
-		pass 
-
-	def on_activated(self, widget, row, col):
+	def selection_changed(self, selection):
 		"""
 		Sets the currently selected items ID
 		"""
-		model = widget.get_model()
-		self.selected_id = model[row][0]
+		model, titer = selection.get_selected()
+		self.selection_id = model.get_path(titer)[0] 
+		print self.selection_id
 
-	def createTextView(self, width=200, height=200, editable=True, wrap=True):
+	def create_text_view(self, width=200, height=200, editable=True, wrap=True):
 		"""
 		Creates a text view with certain settings.
 		"""
@@ -190,7 +198,7 @@ class TodoGUI:
 
 		return textview
 
-	def getAllTextViewText(self, textview):
+	def get_all_text_view_text(self, textview):
 		"""
 		Gets all the text from a text view.
 		"""
