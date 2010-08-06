@@ -7,6 +7,7 @@ import sys
 import pygtk
 pygtk.require('2.0')
 import gtk
+import pango
 
 
 json_folder = os.path.expanduser('~') + '/.todopy/'
@@ -23,8 +24,6 @@ class TodoGUI:
 		# Initialise default list.
 		# TODO: Support multiple lists
 		self.todolist = TodoList(json_folder + 'todo.json')
-	
-		self.selection_id = None;
 
 		# Start of multiple lists support. Currently unused
 		for infile in glob.glob( os.path.join(json_folder, '*.json') ):
@@ -32,19 +31,11 @@ class TodoGUI:
 			self.lists[listname] = TodoList(infile)
 			print 'Found:', infile.replace(json_folder, '').replace('.json', '')
 
-		for k, v in self.lists.iteritems():
-			print 
-			print k
-			print '------------'
-			print v
-			print
-
-
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.window.set_title('Simple Python Todo')
 	
 		send_button = gtk.Button(None, gtk.STOCK_ADD)
-		send_button.connect('clicked', self.add_item)
+		send_button.connect('clicked', self.send_button_clicked)
 
 		vbox = gtk.VBox(False, 10)
 		vbox.set_border_width(10)
@@ -52,23 +43,8 @@ class TodoGUI:
 		hbox_note_area = gtk.HBox(False, 0)
 		hbox_send_area = gtk.HBox(False, 0)
 
-		# Set up the text view for showing the notes
-		sw_display = gtk.ScrolledWindow()
-		sw_display.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-		
-		self.store = self.create_model()
-		self.display_view = gtk.TreeView(self.store)
-		self.display_view.set_size_request(280, 200)
-		self.display_view.connect('key_press_event', self.display_key_pressed)
-
-		selection = self.display_view.get_selection()
-		selection.connect("changed", self.selection_changed)
-		selection.set_mode(gtk.SELECTION_SINGLE)
-
-		self.display_view.set_rules_hint(True)
-		self.create_columns(self.display_view)
-		sw_display.add(self.display_view)
-		
+		self.current_list = ListPanel(self.todolist)
+		sw_display = self.current_list.sw
 		hbox_note_area.pack_start(sw_display)
 
 		# Set up the text view for adding new notes
@@ -99,30 +75,7 @@ class TodoGUI:
 		"""
 		gtk.main()
 
-	def create_model(self):
-		"""
-		Sets up the store for the TreeView
-		"""
-		store = gtk.ListStore(int, str)
 
-		for todo in self.todolist:
-			store.append([todo['id'], todo['text']])
-
-		return store
-
-	def create_columns(self, tree_view):
-		"""
-		Sets up the columns for the TreeView
-		"""
-		
-		renderer_text = gtk.CellRendererText()
-		renderer_text.props.wrap_width = 280
-		renderer_text.props.wrap_mode = gtk.WRAP_WORD
-		column = gtk.TreeViewColumn('Text', renderer_text, text=1)
-		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
-		column.set_max_width(200)
-		column.set_sort_column_id(1)
-		tree_view.append_column(column)
 
 	def delete_event(self, widget, event, Data=None):
 		"""
@@ -138,49 +91,23 @@ class TodoGUI:
 		"""
 		if event.keyval == gtk.gdk.keyval_from_name('Return') or \
 		event.keyval == gtk.gdk.keyval_from_name('KP_Enter'):
-			self.add_item()
+			self.add_item_to_list(self.current_list)
 			return True		
 
-	def display_key_pressed(self, widget, event, Data=None):
+	def send_button_clicked(self, widget, event, Data=None):
 		"""
-		Deletes the item from the list if the delete key is pressed.
-		""" 
-		print 'display_key_pressed', self.selection_id
-		if event.keyval == gtk.gdk.keyval_from_name('Delete') and self.selection_id is not None:
-			print 'DELETE'
-			self.remove_item(self.selection_id)
-			self.selection_id = None;
-			return True
-	
-	def add_item(self, widget=None, Data=None):
+		Adds a new item when the send button is clicked.
 		"""
-		Adds an item to the todo list.
+		self.add_item_to_list(self.current_list)
+		return True
+
+	def add_item_to_list(self, todolist):
+		"""
+		Copies the text from the entry box to a todolist.
 		"""
 		note = self.get_all_text_view_text(self.textview_add)
-		newid = self.todolist.add(note)
+		todolist.add_item(note)
 		self.textview_add.get_buffer().set_text('')
-		self.store.append([newid, note])
-
-	def remove_item(self, item_id):
-		self.todolist.remove(item_id + 1)
-		model = self.store
-		titer = model.get_iter_root()
-		while True:
-			if model.get_path(titer)[0] == item_id:
-				model.remove(titer)
-				break
-			else:
-				titer = model.iter_next(titer)
-				if titer is None:
-					break
-
-	def selection_changed(self, selection):
-		"""
-		Sets the currently selected items ID
-		"""
-		model, titer = selection.get_selected()
-		self.selection_id = model.get_path(titer)[0] 
-		print self.selection_id
 
 	def create_text_view(self, width=200, height=200, editable=True, wrap=True):
 		"""
@@ -206,5 +133,99 @@ class TodoGUI:
 		startiter, enditer = textbuffer.get_bounds()
 		text = startiter.get_slice(enditer)
 		return text
+
+class ListPanel:
+
+	def __init__(self, todolist):
+		"""
+		Set up the tree view for showing a todo list.
+		"""
+		self.todolist = todolist
+		self.selection_id = None;
+		
+		
+		self.store = self.create_model(todolist)
+		self.display_view = gtk.TreeView(self.store)
+		self.display_view.set_size_request(280, 200)
+		self.display_view.set_rules_hint(True)
+		
+		self.display_view.connect('key_press_event', self.key_pressed)
+
+		selection = self.display_view.get_selection()
+		selection.connect("changed", self.selection_changed)
+		selection.set_mode(gtk.SELECTION_SINGLE)
+
+		self.create_columns(self.display_view)
+		
+	
+		self.sw = gtk.ScrolledWindow()
+		self.sw.add(self.display_view)
+		self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+
+	def create_model(self, todolist):
+		"""
+		Sets up the store for the TreeView
+		"""
+		store = gtk.ListStore(int, str)
+
+		for todo in todolist:
+			store.append([todo['id'], todo['text']])
+
+		return store
+	
+	def create_columns(self, tree_view):
+		"""
+		Sets up the columns for the TreeView
+		"""
+		
+		renderer_text = gtk.CellRendererText()
+		renderer_text.props.wrap_width = 280
+		renderer_text.props.wrap_mode = pango.WRAP_WORD
+		column = gtk.TreeViewColumn('Text', renderer_text, text=1)
+		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+		#column.set_max_width(200)
+		column.set_sort_column_id(1)
+		tree_view.append_column(column)
+	
+	def add_item(self, text):
+		"""
+		Adds an item to the todo list.
+		"""
+		newid = self.todolist.add(text)
+		self.store.append([newid, text])
+
+	def remove_item(self, item_id):
+		"""
+		Remove an item from the list, and the display.
+		"""
+		self.todolist.remove(item_id + 1) # List's are 1-indexed, everything else is 0-indexed
+		model = self.store
+		titer = model.get_iter_root()
+		while True:
+			if model.get_path(titer)[0] == item_id:
+				model.remove(titer)
+				break
+			else:
+				titer = model.iter_next(titer)
+				if titer is None:
+					break
+
+	def key_pressed(self, widget, event, Data=None):
+		"""
+		Deletes the item from the list if the delete key is pressed.
+		""" 
+		if event.keyval == gtk.gdk.keyval_from_name('Delete') and self.selection_id is not None:
+			self.remove_item(self.selection_id)
+			self.selection_id = None;
+			return True
+
+	def selection_changed(self, selection):
+		"""
+		Sets the currently selected items ID
+		"""
+		model, titer = selection.get_selected()
+		if titer is not None:
+			self.selection_id = model.get_path(titer)[0] 
+			print self.selection_id
 
 TodoGUI().main()
