@@ -201,24 +201,10 @@ class ListPanel:
 		"""
 		self.todolist.remove(item_id) 
 		store = self.store
-		store.foreach(self.find_item_to_remove, item_id)
-		#titer = store.get_iter_root()
-		#while True:
-		#	if store.get_path(titer)[0] == item_id:
-		#		store.remove(titer)
-		#		break
-		#	else:
-		#		titer = store.iter_next(titer)
-		#		if titer is None:
-		#			break
-
-	def find_item_to_remove(self, model, path, iter, user_data):
-		"""
-		Finds and removes the correct item from the ListStore.
-		"""
-		if path[0] == user_data:
-			model.remove(iter)
-			return True
+		for row in store:
+			if row[0] == item_id:
+				store.remove(row.iter)
+				break	
 
 	def key_pressed(self, widget, event, Data=None):
 		"""
